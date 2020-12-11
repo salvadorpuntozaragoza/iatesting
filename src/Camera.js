@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import ml from '@react-native-firebase/ml';
+import { MLKitModule } from './mlkitmodule';
 
 const styles = StyleSheet.create({
   container: {
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   }
 });
 
-const Camera = ({ route }) => {
+const Camera = ({ route, navigation }) => {
 
   const { type } = route.params;
 
@@ -44,33 +44,50 @@ const Camera = ({ route }) => {
     const data = await camera.takePictureAsync(options);
     try {
       if (type === "Text") {
-        processDocument(data.uri);
+        const textRec = await MLKitModule.deviceTextRecognition(data.uri);
+        console.log("Text recognition on device: ", textRec);
+        console.warn(textRec);
+        navigation.navigate("Results", { data: textRec, type: "Text" });
+        // processDocument(data.uri);
       } else {
-        processImage(data.uri);
+        console.log("Unable to process");
+        const labeler = await MLKitModule.deviceImageLabeling(data.uri);
+        console.log("Image recognition on device: ", labeler);
+        console.warn(labeler);
+        navigation.navigate("Results", { data: labeler, type: "Image" });
+        // processImage(data.uri);
       }
     } catch (error) {
       console.warn(error);
     }
   }
 
-  async function processImage(filepath) {
-    const labels = await ml().cloudImageLabelerProcessImage(filepath);
-    labels.forEach(label => {
-      console.log('Service labelled the image: ', label.text);
-      console.log('Confidence in the label: ', label.confidence);
-    });
-  }
+  // async function processImage(filepath) {
+  //   const labels = await ml().cloudImageLabelerProcessImage(filepath);
+  //   labels.forEach(label => {
+  //     console.log('Service labelled the image: ', label.text);
+  //     console.log('Confidence in the label: ', label.confidence);
+  //   });
+  // }
 
-  async function processDocument(filePath) {
-    const processed = await ml().cloudDocumentTextRecognizerProcessImage(filePath);
-    console.log('Found text in document: ', processed.text);
+  // async function processDocument(filePath) {
+  //   const processed = await ml().cloudDocumentTextRecognizerProcessImage(filePath);
+  //   console.log('Found text in document: ', processed.text);
 
-    processed.blocks.forEach(block => {
-      console.log('Found block with text: ', block.text);
-      console.log('Confidence in block: ', block.confidence);
-      console.log('Languages found in block: ', block.recognizedLanguages);
-    });
-  }
+  //   processed.blocks.forEach(block => {
+  //     console.log('Found block with text: ', block.text);
+  //     console.log('Confidence in block: ', block.confidence);
+  //     console.log('Languages found in block: ', block.recognizedLanguages);
+  //   });
+  // }
+
+  // const textRecognized = async (object) => {
+  //   const { textBlocks } = object;
+  //   console.log("Text recognized");
+  //   await textBlocks.forEach((element) => {
+  //     console.log(element.value);
+  //   });
+  // }
 
   return (
     <View style={styles.container}>
@@ -83,7 +100,6 @@ const Camera = ({ route }) => {
           buttonPositive: 'Allow',
           buttonNegative: 'Decline'
         }}
-        onTextRecognized={(blocks) => console.log("Detected blocks: ", blocks)}
       >
         {({ camera, status }) => {
           if (status !== "READY") return <WaitingView />

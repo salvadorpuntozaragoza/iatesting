@@ -3,6 +3,15 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
 
     <application
       android:name=".MainApplication"
@@ -25,8 +34,8 @@
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
       <meta-data
-        android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-        android:value="ocr, face" /> <!-- choose models that you will use -->
+        android:name="com.google.mlkit.vision.DEPENDENCIES"
+        android:value="ocr" /> <!-- choose models that you will use -->
     </application>
 
 </manifest>
